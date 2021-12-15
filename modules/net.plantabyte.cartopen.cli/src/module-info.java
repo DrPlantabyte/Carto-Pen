@@ -1,5 +1,5 @@
-module net.plantabyte.cartopen.app {
-	exports net.plantabyte.cartopen.app;
+module net.plantabyte.cartopen.cli {
+	exports net.plantabyte.cartopen.cli;
 	requires net.plantabyte.cartopen;
 	requires net.plantabyte.drptrace;
 	requires net.plantabyte.drptrace.utils;
