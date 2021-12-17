@@ -7,4 +7,6 @@ module net.plantabyte.cartopen.cli {
 	requires java.base;
 	requires java.xml;
 	requires java.desktop;
+
+	opens net.plantabyte.cartopen.cli to info.picocli;
 }

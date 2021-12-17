@@ -1,1 +1,1 @@
---create --file build/jar/Carto-Pen-CLI.jar --module-version 0.0.1 --main-class net.plantabyte.cartopen.cli.Main -C build/compile/net.plantabyte.cartopen.cli .
+--create --file build/jar/Carto-Pen-CLI.jar --module-version 0.0.1 --main-class net.plantabyte.cartopen.cli.CartoPenCLI -C build/compile/net.plantabyte.cartopen.cli .

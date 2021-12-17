@@ -1,1 +1,1 @@
---output build/jlink/native --module-path build/compile:Carto-Pen/dependencies --launcher launch=net.plantabyte.cartopen.cli/net.plantabyte.cartopen.cli.Main --no-header-files --no-man-pages --add-modules net.plantabyte.cartopen,net.plantabyte.cartopen.test,net.plantabyte.cartopen.cli
+--output build/jlink/native --module-path build/compile:Carto-Pen/dependencies --launcher launch=net.plantabyte.cartopen.cli/net.plantabyte.cartopen.cli.CartoPenCLI --no-header-files --no-man-pages --add-modules net.plantabyte.cartopen,net.plantabyte.cartopen.test,net.plantabyte.cartopen.cli

@@ -1,1 +1,1 @@
---module-path build/compile:Carto-Pen/dependencies --module net.plantabyte.cartopen/net.plantabyte.cartopen.Main
+--module-path build/compile:dependencies --module net.plantabyte.cartopen/net.plantabyte.cartopen.Main
