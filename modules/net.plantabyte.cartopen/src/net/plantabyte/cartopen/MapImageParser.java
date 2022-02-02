@@ -1,6 +1,6 @@
 package net.plantabyte.cartopen;
-public class Main {
+public class MapImageParser {
 	public static void main(String[] args){
-		System.out.println(Main.class);
+		System.out.println(MapImageParser.class);
 	}
 }
