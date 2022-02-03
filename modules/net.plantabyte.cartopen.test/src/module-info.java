@@ -5,4 +5,5 @@ module net.plantabyte.cartopen.test {
 	requires net.plantabyte.drptrace;
 	requires net.plantabyte.drptrace.utils;
 	requires java.desktop;
+	requires java.xml;
 }

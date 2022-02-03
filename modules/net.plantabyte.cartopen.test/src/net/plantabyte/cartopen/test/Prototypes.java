@@ -1,9 +1,14 @@
 package net.plantabyte.cartopen.test;
 
+import net.plantabyte.lwdom.LWDNode;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -149,14 +154,13 @@ public class Prototypes {
 		Files.writeString(Paths.get("test2-B.svg"), svg);
 	}
 
-	public static void test3(){
-		SimpleXMLElement root = new SimpleXMLElement("root");
-		root.appendChild(
-				SimpleXMLElement.newElement("group")
-						.setAttribute("id","1")
-						.setAttribute("style", "fill='#quoted'")
-						.appendText("Someone's text. \"Hi!\""));
-		print(root.writeToString());
+	public static void test3() throws Exception {
+		var doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+		var svg = doc.createElement("svg");
+		doc.appendChild(svg);
+
+
+
 	}
 
 	private static void showImg(BufferedImage img){
