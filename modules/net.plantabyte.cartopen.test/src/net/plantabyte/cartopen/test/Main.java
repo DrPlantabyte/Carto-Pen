@@ -4,11 +4,14 @@ public class Main {
 	public static void main(String[] args){
 		try {
 			System.out.println(Main.class);
-			print("Test 1");
-			Prototypes.test1();
+//			print("Test 1");
+//			Prototypes.test1();
 
-			print("Test 2");
-			Prototypes.test2();
+//			print("Test 2");
+//			Prototypes.test2();
+
+			print("Test 3");
+			Prototypes.test3();
 		} catch (Exception ex){
 			System.out.flush();
 			ex.printStackTrace(System.err);

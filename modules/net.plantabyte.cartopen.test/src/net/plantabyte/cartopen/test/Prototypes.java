@@ -148,6 +148,17 @@ public class Prototypes {
 </svg>""");
 		Files.writeString(Paths.get("test2-B.svg"), svg);
 	}
+
+	public static void test3(){
+		SimpleXMLElement root = new SimpleXMLElement("root");
+		root.appendChild(
+				SimpleXMLElement.newElement("group")
+						.setAttribute("id","1")
+						.setAttribute("style", "fill='#quoted'")
+						.appendText("Someone's text. \"Hi!\""));
+		print(root.writeToString());
+	}
+
 	private static void showImg(BufferedImage img){
 		JOptionPane.showMessageDialog(null, new JLabel(new ImageIcon(img)));
 	}
