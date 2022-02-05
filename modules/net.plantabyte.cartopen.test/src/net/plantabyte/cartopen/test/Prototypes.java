@@ -245,6 +245,18 @@ public class Prototypes {
 		root.writeToFile(Paths.get("test3B.svg"));
 	}
 
+	public static void test4() throws Exception {
+		final int w = 300; final int h = 200; final int cellSize = 20;
+		var svg = new SVGManager(w, h);
+		var mountainIDs = new ArrayList<String>(4);
+		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-1.svg").toURI())));
+		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-2.svg").toURI())));
+		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-3.svg").toURI())));
+		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-4.svg").toURI())));
+		var prng = new Random();
+
+	}
+
 	private static void showImg(BufferedImage img){
 		JOptionPane.showMessageDialog(null, new JLabel(new ImageIcon(img)));
 	}
