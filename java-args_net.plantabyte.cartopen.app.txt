@@ -1,1 +1,1 @@
---module-path build/compile:dependencies --module net.plantabyte.cartopen.cli/net.plantabyte.cartopen.cli.CartoPenCLI
+--module-path build/compile --module-path dependencies --module net.plantabyte.cartopen.cli/net.plantabyte.cartopen.cli.CartoPenCLI
