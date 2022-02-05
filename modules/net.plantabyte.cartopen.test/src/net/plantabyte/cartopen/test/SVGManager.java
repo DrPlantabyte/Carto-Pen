@@ -1,18 +1,16 @@
 package net.plantabyte.cartopen.test;
 
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SVGManager {
-
-	final DOMBuilder dom;
-	final int width;
-	final int height;
+	
+	private final DOMBuilder dom;
+	private final int width;
+	private final int height;
+	
 	public SVGManager(int w, int h) {
 		width = w;
 		height = h;
@@ -37,9 +35,36 @@ public class SVGManager {
 	}
 
 	public String importAsDef(Path svgSrc) throws IOException {
+		
 		// TODO: add in defs as group and return ID
+		throw new UnsupportedOperationException("Not implemented yet");
 	}
-
+	
+	private static class IDMaker{
+		private final Map<String, Integer> countTracker = new HashMap<>();
+		public IDMaker(){
+			//
+		}
+		
+		public String makeID(String baseID){
+			baseID = baseID.strip();
+			var base = new StringBuilder();
+			for(int i = 0; i < baseID.length(); i++){
+				int cp = baseID.codePointAt(i);
+				i += (Character.charCount(cp) - 1);
+				if(Character.isLetterOrDigit(cp)){
+					base.append(Character.toString(cp));
+				}
+			}
+			int endIndex = base.length()-1;
+			var baseStr = base.toString();
+			while(Character.isDigit(baseStr.indexOf(endIndex))){
+				endIndex--;
+			}
+			if(endIndex <= 0) baseStr = "_";
+			if(countTracker.containsKey())
+		}
+	}
 
 
 
