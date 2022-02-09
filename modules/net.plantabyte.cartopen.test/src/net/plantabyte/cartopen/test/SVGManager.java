@@ -9,6 +9,7 @@ public class SVGManager {
 	private final DOMBuilder dom;
 	private final int width;
 	private final int height;
+	private final IDMaker idMaker = new IDMaker();
 	
 	public SVGManager(int w, int h) {
 		width = w;
@@ -34,9 +35,11 @@ public class SVGManager {
 	}
 
 	public String importAsDef(Path svgSrc) throws IOException {
-		
+		String filename = svgSrc.getName();
+		String id = idMaker.makeID(filename.substring(0,filename.lastIndexOf(".")));
 		// TODO: add in defs as group and return ID
 		throw new UnsupportedOperationException("Not implemented yet");
+		//return id;
 	}
 	
 	private static class IDMaker{
