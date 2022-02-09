@@ -2,8 +2,7 @@ package net.plantabyte.cartopen.test;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SVGManager {
 	
@@ -41,7 +40,7 @@ public class SVGManager {
 	}
 	
 	private static class IDMaker{
-		private final Map<String, Integer> countTracker = new HashMap<>();
+		private final Set<String> countTracker = new HashSet<>();
 		public IDMaker(){
 			//
 		}
@@ -62,7 +61,12 @@ public class SVGManager {
 				endIndex--;
 			}
 			if(endIndex <= 0) baseStr = "_";
-			if(countTracker.containsKey())
+			int i = 2;
+			String idStr = baseStr;
+			while(countTracker.contains(idStr)){
+				idStr = String.format("%s%s", baseStr, i++);
+			}
+			return idStr;
 		}
 	}
 

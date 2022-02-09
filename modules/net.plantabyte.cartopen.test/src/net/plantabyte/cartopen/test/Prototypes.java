@@ -1,6 +1,9 @@
 package net.plantabyte.cartopen.test;
 
 
+import net.plantabyte.drptrace.PolylineTracer;
+import net.plantabyte.drptrace.utils.BufferedImageIntMap;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -15,8 +18,10 @@ import static net.plantabyte.cartopen.test.Main.print;
 public class Prototypes {
 	public static void test1() throws Exception{
 		var img = ImageIO.read(Prototypes.class.getResource("test-map-img-1.png"));
-		final int nColors = 10;
-		var shapes = net.plantabyte.drptrace.utils.ImageTracer.traceBufferedImage(img, nColors);
+		//var shapes = net.plantabyte.drptrace.utils.ImageTracer.traceBufferedImage(img, nColors);
+		var bitBuffer = BufferedImageIntMap.fromBufferedImage(img);
+		var tracer = new PolylineTracer();
+		var shapes = tracer.traceAllShapes(bitBuffer);
 		BufferedImage canvas = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		for(var shape : shapes) for(var path : shape){
 			net.plantabyte.drptrace.utils.BezierPlotter.drawBezier(path, canvas.createGraphics(), Optional.of(new Color(shape.getColor())), Optional.of(new BasicStroke(3)));
@@ -32,8 +37,9 @@ public class Prototypes {
 		for(int i = 0; i < biome_colors.length; i++){
 			biomeMap.put(biome_colors[i], biome_ids[i]);
 		}
-		final int nColors = 10;
-		var shapes = net.plantabyte.drptrace.utils.ImageTracer.traceBufferedImage(img, nColors);
+		var bitBuffer = BufferedImageIntMap.fromBufferedImage(img);
+		var tracer = new PolylineTracer();
+		var shapes = tracer.traceAllShapes(bitBuffer);
 		BufferedImage canvas = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		var colors = new HashSet<Integer>();
 		for(var shape : shapes) {
