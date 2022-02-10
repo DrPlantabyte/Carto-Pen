@@ -4,6 +4,7 @@ public class Main {
 	public static void main(String[] args){
 		try {
 			System.out.println(Main.class);
+			/*
 			print("Test 1");
 			Prototypes.test1();
 
@@ -12,6 +13,9 @@ public class Main {
 
 			print("Test 3");
 			Prototypes.test3();
+*/
+			print("Test 4");
+			Prototypes.test4();
 		} catch (Exception ex){
 			System.out.flush();
 			ex.printStackTrace(System.err);

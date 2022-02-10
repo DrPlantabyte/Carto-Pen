@@ -261,11 +261,17 @@ public class Prototypes {
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-3.svg").toURI())));
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-4.svg").toURI())));
 		var prng = new Random();
-		var pos = new Vec2(100, 100);
-		var scale = new Vec2(1, 1);
-		var rotation = 0.0;
-		svg.placeIcon(mountainIDs.get(prng.nextInt(mountainIDs.size())), pos, scale, rotation);
+		var center = new Vec2(w/2, h/2);
+		var r = 50;
+		for(double theta = 0; theta < 2*Math.PI; theta += 0.25*Math.PI){
+			var pos = new Vec2(r*Math.cos(theta)+center.x, r*Math.sin(theta)+center.y);
+			var scale = /*new Vec2(1,1);//*/  new Vec2(0.5+prng.nextDouble(), 0.5+prng.nextDouble());
+			var rotation = 0.0;//*/  30*(prng.nextDouble()-0.5);
+			var iconID = svg.placeIcon(mountainIDs.get(2 /*prng.nextInt(mountainIDs.size())*/), pos, scale, rotation);
+			print(iconID);
+		}
 
+		svg.writeToFile(Paths.get("test4.svg"));
 	}
 
 	private static void showImg(BufferedImage img){

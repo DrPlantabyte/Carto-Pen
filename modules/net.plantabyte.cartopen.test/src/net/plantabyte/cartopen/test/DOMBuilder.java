@@ -72,7 +72,7 @@ public class DOMBuilder {
 
 	public Optional<String> getAttribute(String key){
 		if(this.pos.hasAttribute(key)){
-			return Optional.of(pos.getAttribute(s));
+			return Optional.of(pos.getAttribute(key));
 		} else {
 			return Optional.empty();
 		}
@@ -148,7 +148,7 @@ public class DOMBuilder {
 		return Collections.unmodifiableList(out);
 	}
 
-	public List<DOMBuilder> recursiveGetChildElements() {
+	public List<DOMBuilder> recursiveGetAllChildElements() {
 		var list = pos.getChildNodes();
 		var out = new LinkedList<DOMBuilder>();
 		final int len = list.getLength();
@@ -156,7 +156,7 @@ public class DOMBuilder {
 			var n = list.item(i);
 			if(n instanceof Element) {
 				var db = new DOMBuilder(this.doc, (Element) n);
-				out.addAll(db.recursiveGetChildElements());
+				out.addAll(db.recursiveGetAllChildElements());
 			}
 		}
 		return Collections.unmodifiableList(out);
@@ -183,11 +183,23 @@ public class DOMBuilder {
 		}
 	}
 
-	public Optional<DOMBuilder> getElementByID(String id) {
-		var all = this.recursiveGetChildElements();
-		for(var e : all){
-			if(e.getAttribute(id).orElse())
+	public Optional<DOMBuilder> getElementByID(final String id) {
+		var list = pos.getChildNodes();
+		final int len = list.getLength();
+		for(int i = 0; i < len; i++){
+			var n = list.item(i);
+			if(n instanceof Element) {
+				var e = ((Element) n);
+				if(e.hasAttribute("id") && id.equals(e.getAttribute("id"))){
+					return Optional.of(new DOMBuilder(this.doc, e));
+				} else {
+					var db = new DOMBuilder(this.doc, (Element) n);
+					var r = db.getElementByID(id);
+					if(r.isPresent()) return r;
+				}
+			}
 		}
+		return Optional.empty();
 	}
 
 

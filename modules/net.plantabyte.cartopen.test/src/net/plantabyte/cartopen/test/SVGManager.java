@@ -3,6 +3,7 @@ package net.plantabyte.cartopen.test;
 import net.plantabyte.drptrace.geometry.Vec2;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -51,9 +52,26 @@ public class SVGManager {
 		return id;
 	}
 
-	public void placeIcon(String id, Vec2 pos, Vec2 scale, double rotation) {
-		dom.getElementsByID(MAIN_CONTENT_ID)
-		throw new UnsupportedOperationException("WIP");
+	public String placeIcon(String id, Vec2 pos, Vec2 scale, double rotationDegrees) {
+		var viewBox = dom.getElementByID(id).orElseThrow()
+				.getAttribute("viewBox").orElseThrow().split("[\\s,]+");
+		var iconID = idMaker.makeID(String.format("%s_clone", id));
+		dom.getElementByID(MAIN_CONTENT_ID).orElseThrow()
+				.appendElement(dom.newElement("use")
+						.setAttribute("id", iconID)
+						.setAttribute("xlink:href",String.format("#%s", id))
+						.setAttribute("x", String.valueOf(pos.x))
+						.setAttribute("y", String.valueOf(pos.y))
+						.setAttribute("transform",String.format("translate(%.5f,%.5f) rotate(%.5f,%.5f,%.5f) scale(%.5f,%.5f)",
+								-0.5*Double.parseDouble(viewBox[2])*scale.x, -0.5*Double.parseDouble(viewBox[3])* scale.y,
+								rotationDegrees, -0.5*Double.parseDouble(viewBox[2]), -0.5*Double.parseDouble(viewBox[3]),
+								scale.x, scale.y))
+				);
+		return iconID;
+	}
+
+	public void writeToFile(Path filepath) throws IOException{
+		dom.writeToFile(filepath);
 	}
 
 	private static class IDMaker{
@@ -83,6 +101,7 @@ public class SVGManager {
 			while(countTracker.contains(idStr)){
 				idStr = String.format("%s%s", baseStr, i++);
 			}
+			countTracker.add(idStr);
 			return idStr;
 		}
 	}
