@@ -2,6 +2,7 @@ package net.plantabyte.cartopen.test;
 
 
 import net.plantabyte.drptrace.PolylineTracer;
+import net.plantabyte.drptrace.geometry.Vec2;
 import net.plantabyte.drptrace.utils.BufferedImageIntMap;
 
 import javax.imageio.ImageIO;
@@ -260,6 +261,10 @@ public class Prototypes {
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-3.svg").toURI())));
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-4.svg").toURI())));
 		var prng = new Random();
+		var pos = new Vec2(100, 100);
+		var scale = new Vec2(1, 1);
+		var rotation = 0.0;
+		svg.placeIcon(mountainIDs.get(prng.nextInt(mountainIDs.size())), pos, scale, rotation);
 
 	}
 

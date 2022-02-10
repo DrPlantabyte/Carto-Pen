@@ -50,7 +50,7 @@ public class DOMBuilder {
 
 
 
-	public static DOMBuilder fromFile(Path f) throws IOException {
+	public static DOMBuilder fromFile(Path f) throws IOException, XMLException {
 		try(var in = Files.newInputStream(f)){
 			var doc = parseXML(in);
 			var root = doc.getDocumentElement();

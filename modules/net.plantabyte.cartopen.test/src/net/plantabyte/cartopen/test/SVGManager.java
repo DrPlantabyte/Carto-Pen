@@ -1,5 +1,7 @@
 package net.plantabyte.cartopen.test;
 
+import net.plantabyte.drptrace.geometry.Vec2;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
@@ -34,14 +36,19 @@ public class SVGManager {
 		;
 	}
 
-	public String importAsDef(Path svgSrc) throws IOException {
-		String filename = svgSrc.getName();
+	public String importAsDef(Path svgSrc) throws IOException, DOMBuilder.XMLException {
+		String filename = svgSrc.getFileName().toString();
 		String id = idMaker.makeID(filename.substring(0,filename.lastIndexOf(".")));
-		// TODO: add in defs as group and return ID
-		throw new UnsupportedOperationException("Not implemented yet");
-		//return id;
+		var loaded = DOMBuilder.fromFile(svgSrc);
+		loaded.setAttribute("id", id);
+		dom.getFirstElementByName("defs").orElseThrow().appendElement(loaded);
+		return id;
 	}
-	
+
+	public void placeIcon(String id, Vec2 pos, Vec2 scale, double rotation) {
+		throw new UnsupportedOperationException("WIP");
+	}
+
 	private static class IDMaker{
 		private final Set<String> countTracker = new HashSet<>();
 		public IDMaker(){
