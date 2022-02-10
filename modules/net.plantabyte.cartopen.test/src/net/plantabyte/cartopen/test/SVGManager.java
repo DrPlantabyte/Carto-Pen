@@ -7,7 +7,9 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class SVGManager {
-	
+
+	private static final String MAIN_CONTENT_ID = "mainLayer";
+
 	private final DOMBuilder dom;
 	private final int width;
 	private final int height;
@@ -33,6 +35,10 @@ public class SVGManager {
 				.appendElement(
 						dom.newElement("defs")
 				)
+				.appendElement(
+						dom.newElement("g")
+								.setAttribute("id", MAIN_CONTENT_ID)
+				)
 		;
 	}
 
@@ -46,6 +52,7 @@ public class SVGManager {
 	}
 
 	public void placeIcon(String id, Vec2 pos, Vec2 scale, double rotation) {
+		dom.getElementsByID(MAIN_CONTENT_ID)
 		throw new UnsupportedOperationException("WIP");
 	}
 

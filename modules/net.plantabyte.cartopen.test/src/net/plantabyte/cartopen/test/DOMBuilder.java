@@ -70,6 +70,14 @@ public class DOMBuilder {
 		return this;
 	}
 
+	public Optional<String> getAttribute(String key){
+		if(this.pos.hasAttribute(key)){
+			return Optional.of(pos.getAttribute(s));
+		} else {
+			return Optional.empty();
+		}
+	}
+
 	public DOMBuilder removeAttribute(String key) {
 		pos.removeAttribute(key);
 		return this;
@@ -140,6 +148,20 @@ public class DOMBuilder {
 		return Collections.unmodifiableList(out);
 	}
 
+	public List<DOMBuilder> recursiveGetChildElements() {
+		var list = pos.getChildNodes();
+		var out = new LinkedList<DOMBuilder>();
+		final int len = list.getLength();
+		for(int i = 0; i < len; i++){
+			var n = list.item(i);
+			if(n instanceof Element) {
+				var db = new DOMBuilder(this.doc, (Element) n);
+				out.addAll(db.recursiveGetChildElements());
+			}
+		}
+		return Collections.unmodifiableList(out);
+	}
+
 
 
 	public String toXMLString() {
@@ -158,6 +180,13 @@ public class DOMBuilder {
 			transformer.transform(src, dst);
 		} catch (TransformerException e) {
 			throw new XMLException(e);
+		}
+	}
+
+	public Optional<DOMBuilder> getElementByID(String id) {
+		var all = this.recursiveGetChildElements();
+		for(var e : all){
+			if(e.getAttribute(id).orElse())
 		}
 	}
 
