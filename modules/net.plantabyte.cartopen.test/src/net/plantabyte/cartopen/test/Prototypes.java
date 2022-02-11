@@ -264,14 +264,31 @@ public class Prototypes {
 		var center = new Vec2(w/2, h/2);
 		var r = 50;
 		for(double theta = 0; theta < 2*Math.PI; theta += 0.25*Math.PI){
+			double size = 20; // make 20 pixels as base size
 			var pos = new Vec2(r*Math.cos(theta)+center.x, r*Math.sin(theta)+center.y);
-			var scale = /*new Vec2(1,1);//*/  new Vec2(0.5+prng.nextDouble(), 0.5+prng.nextDouble());
-			var rotation = 0.0;//*/  30*(prng.nextDouble()-0.5);
-			var iconID = svg.placeIcon(mountainIDs.get(2 /*prng.nextInt(mountainIDs.size())*/), pos, scale, rotation);
+			var scale = new Vec2(0.5+prng.nextDouble(), 0.5+prng.nextDouble());
+			var rotation = 90*(prng.nextDouble()-0.5);
+			var iconID = svg.placeIcon(mountainIDs.get(prng.nextInt(mountainIDs.size())), size, pos, scale, rotation);
 			print(iconID);
 		}
 
 		svg.writeToFile(Paths.get("test4.svg"));
+	}
+
+
+
+	public static void test5() throws Exception {
+		final int w = 300; final int h = 200; final int cellSize = 20;
+		var svg = new SVGManager(w, h);
+		var mountainIDs = new ArrayList<String>(4);
+		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-1.svg").toURI())));
+		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-2.svg").toURI())));
+		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-3.svg").toURI())));
+		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-4.svg").toURI())));
+		var prng = new Random();
+		// TODO: test hex grid or similar pattern
+
+		svg.writeToFile(Paths.get("test5.svg"));
 	}
 
 	private static void showImg(BufferedImage img){
