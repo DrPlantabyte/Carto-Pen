@@ -1,6 +1,7 @@
 package net.plantabyte.cartopen.test;
 
 
+import net.plantabyte.drptrace.IntMap;
 import net.plantabyte.drptrace.PolylineTracer;
 import net.plantabyte.drptrace.geometry.Vec2;
 import net.plantabyte.drptrace.utils.BufferedImageIntMap;
@@ -289,6 +290,32 @@ public class Prototypes {
 		// TODO: test hex grid or similar pattern
 
 		svg.writeToFile(Paths.get("test5.svg"));
+	}
+
+	private static void fillRegion(IntMap map, int mapValue, SVGManager svg, String[] paletteOfIDs, double size, double spacing, double decorFrequency, Random prng){
+		/*
+vertically stacked hex pattern
+ __
+/  \__/
+\__/  \
+/  \__/
+		 */
+
+		final double piOverThree = Math.PI / 3; // 60 degrees
+		final double root3over2 = Math.sqrt(3.0)/2.0;
+		final double colWidth = spacing * root3over2;
+		final double alternatingOffset = spacing * 0.5;
+		final double rowHeight = spacing;
+		final int numCols = (int)(svg.getWidth() / colWidth) + 1;
+		final int numRows = (int)(svg.getWidth() / rowHeight) + 1;
+		for(int row = 0; row < numRows; ++row){
+			for(int col = 0; col < numCols; ++col){
+				final double x = col * colWidth;
+				final double y = row * rowHeight + ((col % 2) * alternatingOffset);
+			}
+		}
+
+		// TODO
 	}
 
 	private static void showImg(BufferedImage img){

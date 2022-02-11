@@ -21,9 +21,9 @@ public class SVGManager {
 		height = h;
 		dom = new DOMBuilder("svg");
 		dom
-				.setAttribute("width", "600")
-				.setAttribute("height", "400")
-				.setAttribute("viewbox", "0 0 600 400")
+				.setAttribute("width", String.valueOf(w))
+				.setAttribute("height", String.valueOf(h))
+				.setAttribute("viewbox", String.format("0 0 %s %s", w, h))
 				.setAttribute("xmlns", "http://www.w3.org/2000/svg")
 				.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink")
 				.setAttribute("xmlns:svg", "http://www.w3.org/2000/svg")
@@ -52,11 +52,11 @@ public class SVGManager {
 		return id;
 	}
 
-	public String placeIcon(final String id, final double baseSize, final Vec2 pos, final Vec2 scale, final double rotationDegrees) throws NoSuchElementException {
+	public String placeIcon(final String id, final double iconDiameter, final Vec2 pos, final Vec2 scale, final double rotationDegrees) throws NoSuchElementException {
 		final var src = dom.getElementByID(id).orElseThrow();
 		final double halfW = 0.5*convertToPixelUnits(src.getAttribute("width").orElseThrow());
 		final double halfH = 0.5*convertToPixelUnits(src.getAttribute("height").orElseThrow());
-		final double resizer = baseSize / Math.sqrt(4*halfW*halfH);
+		final double resizer = iconDiameter / Math.sqrt(4*halfW*halfH);
 		var iconID = idMaker.makeID(String.format("%s_clone", id));
 		String transString = String.format("translate(%.5f,%.5f) scale(%.5f,%.5f)",
 				pos.x-(scale.x*halfW*resizer), pos.y-(scale.y*halfH*resizer),
@@ -78,6 +78,13 @@ public class SVGManager {
 
 	public void writeToFile(Path filepath) throws IOException{
 		dom.writeToFile(filepath);
+	}
+
+	public double getWidth() {
+		return convertToPixelUnits(dom.getAttribute("width").orElseThrow());
+	}
+	public double getHeight() {
+		return convertToPixelUnits(dom.getAttribute("height").orElseThrow());
 	}
 
 	private static class IDMaker{
