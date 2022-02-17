@@ -278,7 +278,19 @@ public class Prototypes {
 
 
 	public static void test5() throws Exception {
-		final int w = 300; final int h = 200; final int cellSize = 20;
+		// load source color map
+		var img = ImageIO.read(Prototypes.class.getResource("test-map-img-1.png"));
+		IntMap intMap = BufferedImageIntMap.fromBufferedImage(img);
+
+		final int w = intMap.getWidth();
+		final int h = intMap.getHeight();
+		final int cellSize = 20;
+
+		// trace source map?
+//		var tracer = new PolylineTracer();
+//		var shapes = tracer.traceAllShapes(bitBuffer);
+
+		// create SVG manager and load icons
 		var svg = new SVGManager(w, h);
 		var mountainIDs = new ArrayList<String>(4);
 		var bubbleIDs = new ArrayList<String>();
@@ -287,17 +299,20 @@ public class Prototypes {
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-3.svg").toURI())));
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-4.svg").toURI())));
 		bubbleIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("bubble-1.svg").toURI())));
-		var prng = new Random();
 
-		var raster = IntMap.fromMatrix(new int[][]{{0,0},{0,0}}); // TODO
-		int target = 0; // TODO
-		fillRegion(raster, target, svg, bubbleIDs.toArray(new String[0]), cellSize*1.5F, cellSize, 0.5F, 0.2F, 0.5F, 0.5F, prng);
+		Map<Integer, String[]> pallete = new HashMap<>();
+
+
+
+		// place icons on map
+		var prng = new Random();
+		decorateMap(intMap, pallete, svg, cellSize*1.5F, cellSize, 0.5F, 0.2F, 0.5F, 0.5F, prng);
 		// TODO: test hex grid or similar pattern
 
 		svg.writeToFile(Paths.get("test5.svg"));
 	}
 
-	private static void fillRegion(IntMap map, int mapValue, SVGManager svg, String[] paletteOfIDs, float size, float spacing, float decorFrequency, float positionJitter, float sizeJitter, float distortion, Random prng){
+	private static void decorateMap(IntMap map, Map<Integer, String[]> decoratorPallet, SVGManager svg, float size, float spacing, float decorFrequency, float positionJitter, float sizeJitter, float distortion, Random prng){
 		/*
 vertically stacked hex pattern
  __
@@ -315,6 +330,13 @@ vertically stacked hex pattern
 		final int numRows = (int)(svg.getWidth() / rowHeight) + 1;
 		for(int row = 0; row < numRows; ++row){
 			for(int col = 0; col < numCols; col += 2){
+				final int color = map.get(col, row);
+				final String[] paletteOfIDs = decoratorPallet.get(color);
+				if(paletteOfIDs == null || paletteOfIDs.length == 0) {
+					// no decorations found for this color!
+					// TODO: option to throw or ignore missing colors
+					continue;
+				}
 				_place(col * colWidth, row * rowHeight, paletteOfIDs, size, spacing, decorFrequency, positionJitter, sizeJitter, distortion, prng, svg);
 			}
 			for(int col = 1; col < numCols; col += 2){
