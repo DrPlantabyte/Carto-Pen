@@ -13,10 +13,10 @@ public class Main {
 
 			print("Test 3");
 			Prototypes.test3();
-*/
+
 			print("Test 4");
 			Prototypes.test4();
-
+*/
 			print("Test 5");
 			Prototypes.test5();
 		} catch (Exception ex){

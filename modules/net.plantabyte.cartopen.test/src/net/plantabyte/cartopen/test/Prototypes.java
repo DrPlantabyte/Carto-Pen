@@ -10,7 +10,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
-import java.beans.XMLDecoder;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -282,17 +281,23 @@ public class Prototypes {
 		final int w = 300; final int h = 200; final int cellSize = 20;
 		var svg = new SVGManager(w, h);
 		var mountainIDs = new ArrayList<String>(4);
+		var bubbleIDs = new ArrayList<String>();
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-1.svg").toURI())));
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-2.svg").toURI())));
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-3.svg").toURI())));
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-4.svg").toURI())));
+		bubbleIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("bubble-1.svg").toURI())));
 		var prng = new Random();
+
+		var raster = IntMap.fromMatrix(new int[][]{{0,0},{0,0}}); // TODO
+		int target = 0; // TODO
+		fillRegion(raster, target, svg, bubbleIDs.toArray(new String[0]), cellSize*1.5F, cellSize, 0.5F, 0.2F, 0.5F, 0.5F, prng);
 		// TODO: test hex grid or similar pattern
 
 		svg.writeToFile(Paths.get("test5.svg"));
 	}
 
-	private static void fillRegion(IntMap map, int mapValue, SVGManager svg, String[] paletteOfIDs, double size, double spacing, double decorFrequency, Random prng){
+	private static void fillRegion(IntMap map, int mapValue, SVGManager svg, String[] paletteOfIDs, float size, float spacing, float decorFrequency, float positionJitter, float sizeJitter, float distortion, Random prng){
 		/*
 vertically stacked hex pattern
  __
@@ -301,7 +306,7 @@ vertically stacked hex pattern
 /  \__/
 		 */
 
-		final double piOverThree = Math.PI / 3; // 60 degrees
+		//final double piOverThree = Math.PI / 3; // 60 degrees
 		final double root3over2 = Math.sqrt(3.0)/2.0;
 		final double colWidth = spacing * root3over2;
 		final double alternatingOffset = spacing * 0.5;
@@ -309,13 +314,29 @@ vertically stacked hex pattern
 		final int numCols = (int)(svg.getWidth() / colWidth) + 1;
 		final int numRows = (int)(svg.getWidth() / rowHeight) + 1;
 		for(int row = 0; row < numRows; ++row){
-			for(int col = 0; col < numCols; ++col){
-				final double x = col * colWidth;
-				final double y = row * rowHeight + ((col % 2) * alternatingOffset);
+			for(int col = 0; col < numCols; col += 2){
+				_place(col * colWidth, row * rowHeight, paletteOfIDs, size, spacing, decorFrequency, positionJitter, sizeJitter, distortion, prng, svg);
+			}
+			for(int col = 1; col < numCols; col += 2){
+				_place(col * colWidth, row * rowHeight + alternatingOffset, paletteOfIDs, size, spacing, decorFrequency, positionJitter, sizeJitter, distortion, prng, svg);
 			}
 		}
 
 		// TODO
+	}
+
+	private static void _place(double x, double y, String[] paletteOfIDs, float size, float spacing, float decorFrequency, float positionJitter, float sizeJitter, float distortion, Random prng, SVGManager svg){
+		if(prng.nextFloat() > decorFrequency) return;
+		x = x + spacing * (plusOrMinusOne(prng) * positionJitter);
+		y = y + spacing * (plusOrMinusOne(prng) * positionJitter);
+		final float iconSize = size + size * sizeJitter * plusOrMinusOne(prng);
+		final var iconProportions = new Vec2(1+distortion*plusOrMinusOne(prng),1+distortion*plusOrMinusOne(prng));
+		final String iconID = paletteOfIDs[prng.nextInt(paletteOfIDs.length)];
+		final double iconRotation = 0;
+		svg.placeIcon(iconID, iconSize,new Vec2(x, y), iconProportions, iconRotation);
+	}
+	private static float plusOrMinusOne(Random prng){
+		return (2F*prng.nextFloat() - 1F);
 	}
 
 	private static void showImg(BufferedImage img){
