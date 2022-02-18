@@ -301,18 +301,20 @@ public class Prototypes {
 		bubbleIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("bubble-1.svg").toURI())));
 
 		Map<Integer, String[]> pallete = new HashMap<>();
-
-
+		pallete.put(0xff898989, mountainIDs.toArray(new String[0]));
+		Map<Integer, String> borderStyles  = new HashMap<>();
+		borderStyles.put(0xff2438ff, "stroke:2px")
+		Map<Integer, Integer> fillColorsRGB = new HashMap<>();
 
 		// place icons on map
 		var prng = new Random();
-		decorateMap(intMap, pallete, svg, cellSize*1.5F, cellSize, 0.5F, 0.2F, 0.5F, 0.5F, prng);
+		decorateMap(intMap, pallete, borderStyles, fillColorsRGB, svg, cellSize, cellSize, 1.0F, 0.0F, 0.0F, 0F, prng, false);
 		// TODO: test hex grid or similar pattern
 
 		svg.writeToFile(Paths.get("test5.svg"));
 	}
 
-	private static void decorateMap(IntMap map, Map<Integer, String[]> decoratorPallet, SVGManager svg, float size, float spacing, float decorFrequency, float positionJitter, float sizeJitter, float distortion, Random prng){
+	private static void decorateMap(IntMap map, Map<Integer, String[]> decoratorPallet, Map<Integer, String> borderStyles, Map<Integer, Integer> fillColorsRGB, SVGManager svg, float size, float spacing, float decorFrequency, float positionJitter, float sizeJitter, float distortion, Random prng, boolean ignoreMissing){
 		/*
 vertically stacked hex pattern
  __
@@ -320,6 +322,7 @@ vertically stacked hex pattern
 \__/  \
 /  \__/
 		 */
+		// TODO: colors and borders
 
 		//final double piOverThree = Math.PI / 3; // 60 degrees
 		final double root3over2 = Math.sqrt(3.0)/2.0;
@@ -330,21 +333,36 @@ vertically stacked hex pattern
 		final int numRows = (int)(svg.getWidth() / rowHeight) + 1;
 		for(int row = 0; row < numRows; ++row){
 			for(int col = 0; col < numCols; col += 2){
-				final int color = map.get(col, row);
+				final double x = col * colWidth; final int ix = (int)(x+0.5);
+				final double y = row * rowHeight; final int iy = (int)(y+0.5);
+				if(!map.isInRange(ix, iy)) continue;
+				final int color = map.get(ix, iy);
 				final String[] paletteOfIDs = decoratorPallet.get(color);
 				if(paletteOfIDs == null || paletteOfIDs.length == 0) {
 					// no decorations found for this color!
-					// TODO: option to throw or ignore missing colors
+					if(paletteOfIDs == null && !ignoreMissing) {
+						throw new IllegalArgumentException (String.format("No decorators found for color %s", color));
+					}
 					continue;
 				}
-				_place(col * colWidth, row * rowHeight, paletteOfIDs, size, spacing, decorFrequency, positionJitter, sizeJitter, distortion, prng, svg);
+				_place(x, y, paletteOfIDs, size, spacing, decorFrequency, positionJitter, sizeJitter, distortion, prng, svg);
 			}
 			for(int col = 1; col < numCols; col += 2){
-				_place(col * colWidth, row * rowHeight + alternatingOffset, paletteOfIDs, size, spacing, decorFrequency, positionJitter, sizeJitter, distortion, prng, svg);
+				final double x = col * colWidth; final int ix = (int)(x+0.5);
+				final double y = row * rowHeight + alternatingOffset; final int iy = (int)(y+0.5);
+				if(!map.isInRange(ix, iy)) continue;
+				final int color = map.get(ix, iy);
+				final String[] paletteOfIDs = decoratorPallet.get(color);
+				if(paletteOfIDs == null || paletteOfIDs.length == 0) {
+					// no decorations found for this color!
+					if(paletteOfIDs == null && !ignoreMissing) {
+						throw new IllegalArgumentException (String.format("No decorators found for color %s", color));
+					}
+					continue;
+				}
+				_place(x, y, paletteOfIDs, size, spacing, decorFrequency, positionJitter, sizeJitter, distortion, prng, svg);
 			}
 		}
-
-		// TODO
 	}
 
 	private static void _place(double x, double y, String[] paletteOfIDs, float size, float spacing, float decorFrequency, float positionJitter, float sizeJitter, float distortion, Random prng, SVGManager svg){
