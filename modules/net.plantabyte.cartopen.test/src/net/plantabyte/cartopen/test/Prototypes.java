@@ -7,10 +7,11 @@ import net.plantabyte.drptrace.geometry.Vec2;
 import net.plantabyte.drptrace.utils.BufferedImageIntMap;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import javax.swing.*;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -303,18 +304,18 @@ public class Prototypes {
 		Map<Integer, String[]> pallete = new HashMap<>();
 		pallete.put(0xff898989, mountainIDs.toArray(new String[0]));
 		Map<Integer, String> borderStyles  = new HashMap<>();
-		borderStyles.put(0xff2438ff, "stroke:2px")
-		Map<Integer, Integer> fillColorsRGB = new HashMap<>();
+		borderStyles.put(0xff2438ff, "fill:none;fill-opacity:1;stroke:#000000;stroke-width:2px;stroke-linecap:round");
 
+		// TODO: create decorator data class with pallette, style, decorFrequency, positionJitter, sizeJitter, distortion
 		// place icons on map
 		var prng = new Random();
-		decorateMap(intMap, pallete, borderStyles, fillColorsRGB, svg, cellSize, cellSize, 1.0F, 0.0F, 0.0F, 0F, prng, false);
+		decorateMap(intMap, pallete, borderStyles, svg, cellSize, cellSize, 1.0F, 0.0F, 0.0F, 0F, prng, false);
 		// TODO: test hex grid or similar pattern
 
 		svg.writeToFile(Paths.get("test5.svg"));
 	}
 
-	private static void decorateMap(IntMap map, Map<Integer, String[]> decoratorPallet, Map<Integer, String> borderStyles, Map<Integer, Integer> fillColorsRGB, SVGManager svg, float size, float spacing, float decorFrequency, float positionJitter, float sizeJitter, float distortion, Random prng, boolean ignoreMissing){
+	private static void decorateMap(IntMap map, Map<Integer, String[]> decoratorPallet, Map<Integer, String> styles, SVGManager svg, float size, float spacing, float decorFrequency, float positionJitter, float sizeJitter, float distortion, Random prng, boolean ignoreMissing){
 		/*
 vertically stacked hex pattern
  __
@@ -341,7 +342,7 @@ vertically stacked hex pattern
 				if(paletteOfIDs == null || paletteOfIDs.length == 0) {
 					// no decorations found for this color!
 					if(paletteOfIDs == null && !ignoreMissing) {
-						throw new IllegalArgumentException (String.format("No decorators found for color %s", color));
+						throw new IllegalArgumentException (String.format("No decorators found for color 0x%s", Integer.toHexString(color)));
 					}
 					continue;
 				}
@@ -356,7 +357,7 @@ vertically stacked hex pattern
 				if(paletteOfIDs == null || paletteOfIDs.length == 0) {
 					// no decorations found for this color!
 					if(paletteOfIDs == null && !ignoreMissing) {
-						throw new IllegalArgumentException (String.format("No decorators found for color %s", color));
+						throw new IllegalArgumentException (String.format("No decorators found for color 0x%s", Integer.toHexString(color)));
 					}
 					continue;
 				}
