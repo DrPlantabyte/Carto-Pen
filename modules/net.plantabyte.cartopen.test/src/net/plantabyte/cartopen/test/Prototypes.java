@@ -301,21 +301,22 @@ public class Prototypes {
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-4.svg").toURI())));
 		bubbleIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("bubble-1.svg").toURI())));
 
-		Map<Integer, String[]> pallete = new HashMap<>();
-		pallete.put(0xff898989, mountainIDs.toArray(new String[0]));
+		Map<Integer, Decorator> pallete = new HashMap<>();
+		pallete.put(0xff898989, new Decorator(mountainIDs,"", 1F, 0F, 0F, 0F));
+		pallete.put(0xff2438ff, new Decorator(mountainIDs,"fill:none;fill-opacity:1;stroke:#000000;stroke-width:2px;stroke-linecap:round", 0F, 0F, 0F, 0F));
 		Map<Integer, String> borderStyles  = new HashMap<>();
 		borderStyles.put(0xff2438ff, "fill:none;fill-opacity:1;stroke:#000000;stroke-width:2px;stroke-linecap:round");
 
 		// TODO: create decorator data class with pallette, style, decorFrequency, positionJitter, sizeJitter, distortion
 		// place icons on map
 		var prng = new Random();
-		decorateMap(intMap, pallete, borderStyles, svg, cellSize, cellSize, 1.0F, 0.0F, 0.0F, 0F, prng, false);
+		decorateMap(intMap, pallete, svg, cellSize, prng, false);
 		// TODO: test hex grid or similar pattern
 
 		svg.writeToFile(Paths.get("test5.svg"));
 	}
 
-	private static void decorateMap(IntMap map, Map<Integer, String[]> decoratorPallet, Map<Integer, String> styles, SVGManager svg, float size, float spacing, float decorFrequency, float positionJitter, float sizeJitter, float distortion, Random prng, boolean ignoreMissing){
+	private static void decorateMap(IntMap map, Map<Integer, Decorator> decoratorPallet, SVGManager svg, float size, Random prng, boolean ignoreMissing){
 		/*
 vertically stacked hex pattern
  __
@@ -324,7 +325,7 @@ vertically stacked hex pattern
 /  \__/
 		 */
 		// TODO: colors and borders
-
+		final float spacing = size;
 		//final double piOverThree = Math.PI / 3; // 60 degrees
 		final double root3over2 = Math.sqrt(3.0)/2.0;
 		final double colWidth = spacing * root3over2;
@@ -334,39 +335,48 @@ vertically stacked hex pattern
 		final int numRows = (int)(svg.getWidth() / rowHeight) + 1;
 		for(int row = 0; row < numRows; ++row){
 			for(int col = 0; col < numCols; col += 2){
-				final double x = col * colWidth; final int ix = (int)(x+0.5);
-				final double y = row * rowHeight; final int iy = (int)(y+0.5);
+				final double x = col * colWidth;
+				final int ix = (int)(x+0.5);
+				final double y = row * rowHeight;
+				final int iy = (int)(y+0.5);
 				if(!map.isInRange(ix, iy)) continue;
 				final int color = map.get(ix, iy);
-				final String[] paletteOfIDs = decoratorPallet.get(color);
-				if(paletteOfIDs == null || paletteOfIDs.length == 0) {
+				final var decorator = decoratorPallet.get(color);
+				if(decorator == null || decorator.getDecorationIDs().length == 0) {
 					// no decorations found for this color!
-					if(paletteOfIDs == null && !ignoreMissing) {
+					if(!ignoreMissing && decorator == null) {
 						throw new IllegalArgumentException (String.format("No decorators found for color 0x%s", Integer.toHexString(color)));
 					}
 					continue;
 				}
-				_place(x, y, paletteOfIDs, size, spacing, decorFrequency, positionJitter, sizeJitter, distortion, prng, svg);
+				_place(x, y, size, spacing, decorator, prng, svg);
 			}
 			for(int col = 1; col < numCols; col += 2){
-				final double x = col * colWidth; final int ix = (int)(x+0.5);
-				final double y = row * rowHeight + alternatingOffset; final int iy = (int)(y+0.5);
+				final double x = col * colWidth;
+				final int ix = (int)(x+0.5);
+				final double y = row * rowHeight + alternatingOffset;
+				final int iy = (int)(y+0.5);
 				if(!map.isInRange(ix, iy)) continue;
 				final int color = map.get(ix, iy);
-				final String[] paletteOfIDs = decoratorPallet.get(color);
-				if(paletteOfIDs == null || paletteOfIDs.length == 0) {
+				final var decorator = decoratorPallet.get(color);
+				if(decorator == null || decorator.getDecorationIDs().length == 0) {
 					// no decorations found for this color!
-					if(paletteOfIDs == null && !ignoreMissing) {
+					if(!ignoreMissing && decorator == null) {
 						throw new IllegalArgumentException (String.format("No decorators found for color 0x%s", Integer.toHexString(color)));
 					}
 					continue;
 				}
-				_place(x, y, paletteOfIDs, size, spacing, decorFrequency, positionJitter, sizeJitter, distortion, prng, svg);
+				_place(x, y, size, spacing, decorator, prng, svg);
 			}
 		}
 	}
 
-	private static void _place(double x, double y, String[] paletteOfIDs, float size, float spacing, float decorFrequency, float positionJitter, float sizeJitter, float distortion, Random prng, SVGManager svg){
+	private static void _place(double x, double y, float size, float spacing, Decorator decorator, Random prng, SVGManager svg){
+		var decorFrequency = decorator.getDecorFrequency();
+		var positionJitter = decorator.getPositionJitter();
+		var sizeJitter = decorator.getSizeJitter();
+		var distortion = decorator.getDistortionJitter();
+		var paletteOfIDs = decorator.getDecorationIDs();
 		if(prng.nextFloat() > decorFrequency) return;
 		x = x + spacing * (plusOrMinusOne(prng) * positionJitter);
 		y = y + spacing * (plusOrMinusOne(prng) * positionJitter);
