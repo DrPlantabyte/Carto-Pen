@@ -324,6 +324,10 @@ vertically stacked hex pattern
 \__/  \
 /  \__/
 		 */
+		var tracer = new PolylineTracer();
+		for(int c : decoratorPallet.keySet()){
+			tracer
+		}
 		// TODO: colors and borders
 		final float spacing = size;
 		//final double piOverThree = Math.PI / 3; // 60 degrees
