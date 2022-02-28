@@ -3,6 +3,7 @@ package net.plantabyte.cartopen.test;
 
 import net.plantabyte.drptrace.IntMap;
 import net.plantabyte.drptrace.PolylineTracer;
+import net.plantabyte.drptrace.geometry.BezierShape;
 import net.plantabyte.drptrace.geometry.Vec2;
 import net.plantabyte.drptrace.utils.BufferedImageIntMap;
 
@@ -13,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static net.plantabyte.cartopen.test.Main.print;
@@ -303,14 +305,12 @@ public class Prototypes {
 
 		Map<Integer, Decorator> pallete = new HashMap<>();
 		pallete.put(0xff898989, new Decorator(mountainIDs,"", 1F, 0F, 0F, 0F));
-		pallete.put(0xff2438ff, new Decorator(mountainIDs,"fill:none;fill-opacity:1;stroke:#000000;stroke-width:2px;stroke-linecap:round", 0F, 0F, 0F, 0F));
-		Map<Integer, String> borderStyles  = new HashMap<>();
-		borderStyles.put(0xff2438ff, "fill:none;fill-opacity:1;stroke:#000000;stroke-width:2px;stroke-linecap:round");
+		pallete.put(0xff2438ff, new Decorator(bubbleIDs,"fill:#0000ff;fill-opacity:1;stroke:#000000;stroke-width:2px;stroke-linecap:round", 0F, 0F, 0F, 0F));
 
 		// TODO: create decorator data class with pallette, style, decorFrequency, positionJitter, sizeJitter, distortion
 		// place icons on map
 		var prng = new Random();
-		decorateMap(intMap, pallete, svg, cellSize, prng, false);
+		decorateMap(intMap, pallete, svg, cellSize, prng, true);
 		// TODO: test hex grid or similar pattern
 
 		svg.writeToFile(Paths.get("test5.svg"));
@@ -325,8 +325,12 @@ vertically stacked hex pattern
 /  \__/
 		 */
 		var tracer = new PolylineTracer();
-		for(int c : decoratorPallet.keySet()){
-			tracer
+		for(var kv : decoratorPallet.entrySet()){
+			if(kv.getValue().getStyle().isPresent()) {
+				List<BezierShape> paths = tracer.traceColor(map, kv.getKey());
+				String pathStr = _join(" ", paths.stream().map((var p)->p.toSVGPathString()).collect(Collectors.toList()));
+				svg.appendPathToBGLayer(pathStr, kv.getValue().getStyle().orElseThrow());
+			}
 		}
 		// TODO: colors and borders
 		final float spacing = size;
@@ -389,6 +393,18 @@ vertically stacked hex pattern
 		final String iconID = paletteOfIDs[prng.nextInt(paletteOfIDs.length)];
 		final double iconRotation = 0;
 		svg.placeIcon(iconID, iconSize,new Vec2(x, y), iconProportions, iconRotation);
+	}
+	private static String _join(String s, List<Object> o){
+		if(o.size() == 0) return "";
+		if(o.size() == 1) return String.valueOf(o.get(0));
+		var sb = new StringBuilder();
+		boolean first = true;
+		for(var oo : o){
+			if(!first) sb.append(s);
+			sb.append(String.valueOf(oo));
+			first = false;
+		}
+		return sb.toString();
 	}
 	private static float plusOrMinusOne(Random prng){
 		return (2F*prng.nextFloat() - 1F);

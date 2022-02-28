@@ -29,7 +29,13 @@ public class Decorator {
 		return this.decorationIDs.toArray(new String[this.decorationIDs.size()]);
 	}
 	
-	public String getStyle(){return svgStyle;}
+	public Optional<String> getStyle(){
+		if(svgStyle == null || svgStyle.isBlank()){
+			return Optional.empty();
+		} else {
+			return Optional.of(svgStyle);
+		}
+	}
 	
 	public float getDecorFrequency() {
 		return decorFrequency;

@@ -10,6 +10,8 @@ import java.util.*;
 public class SVGManager {
 
 	private static final String MAIN_CONTENT_ID = "mainLayer";
+	private static final String BG_CONTENT_ID = "bgLayer";
+	private static final String FG_CONTENT_ID = "fgLayer";
 
 	private final DOMBuilder dom;
 	private final int width;
@@ -38,7 +40,15 @@ public class SVGManager {
 				)
 				.appendElement(
 						dom.newElement("g")
+								.setAttribute("id", BG_CONTENT_ID)
+				)
+				.appendElement(
+						dom.newElement("g")
 								.setAttribute("id", MAIN_CONTENT_ID)
+				)
+				.appendElement(
+						dom.newElement("g")
+								.setAttribute("id", FG_CONTENT_ID)
 				)
 		;
 	}
@@ -85,6 +95,34 @@ public class SVGManager {
 	}
 	public double getHeight() {
 		return convertToPixelUnits(dom.getAttribute("height").orElseThrow());
+	}
+
+	public void appendPathToBGLayer(String pathSpec, String style) {
+		dom.getElementByID(BG_CONTENT_ID).orElseThrow()
+				.appendElement(dom.newElement("path")
+						.setAttribute("style", style)
+						.setAttribute("fill-rule", "evenodd")
+						.setAttribute("d", pathSpec)
+				);
+
+	}
+	public void appendPathToMainLayer(String pathSpec, String style) {
+		dom.getElementByID(MAIN_CONTENT_ID).orElseThrow()
+				.appendElement(dom.newElement("path")
+						.setAttribute("style", style)
+						.setAttribute("fill-rule", "evenodd")
+						.setAttribute("d", pathSpec)
+				);
+
+	}
+	public void appendPathToFGLayer(String pathSpec, String style) {
+		dom.getElementByID(FG_CONTENT_ID).orElseThrow()
+				.appendElement(dom.newElement("path")
+						.setAttribute("style", style)
+						.setAttribute("fill-rule", "evenodd")
+						.setAttribute("d", pathSpec)
+				);
+
 	}
 
 	private static class IDMaker{
