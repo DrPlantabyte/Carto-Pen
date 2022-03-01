@@ -1,10 +1,8 @@
 package net.plantabyte.cartopen.test;
 
 
-import net.plantabyte.drptrace.IntMap;
-import net.plantabyte.drptrace.PolylineTracer;
-import net.plantabyte.drptrace.geometry.BezierShape;
-import net.plantabyte.drptrace.geometry.Vec2;
+import net.plantabyte.drptrace.*;
+import net.plantabyte.drptrace.geometry.*;
 import net.plantabyte.drptrace.utils.BufferedImageIntMap;
 
 import javax.imageio.ImageIO;
@@ -324,7 +322,8 @@ vertically stacked hex pattern
 \__/  \
 /  \__/
 		 */
-		var tracer = new PolylineTracer();
+		//var tracer = new PolylineTracer();
+		var tracer = new IntervalTracer(1+(int)size);
 		for(var kv : decoratorPallet.entrySet()){
 			if(kv.getValue().getStyle().isPresent()) {
 				List<BezierShape> paths = tracer.traceColor(map, kv.getKey());
@@ -332,7 +331,6 @@ vertically stacked hex pattern
 				svg.appendPathToBGLayer(pathStr, kv.getValue().getStyle().orElseThrow());
 			}
 		}
-		// TODO: colors and borders
 		final float spacing = size;
 		//final double piOverThree = Math.PI / 3; // 60 degrees
 		final double root3over2 = Math.sqrt(3.0)/2.0;

@@ -77,6 +77,13 @@ public class DOMBuilder {
 			return Optional.empty();
 		}
 	}
+	public Optional<String> getAttributeNS(String namespaceURI, String key){
+		if(this.pos.hasAttributeNS(namespaceURI, key)){
+			return Optional.of(pos.getAttributeNS(namespaceURI, key));
+		} else {
+			return Optional.empty();
+		}
+	}
 
 	public DOMBuilder removeAttribute(String key) {
 		pos.removeAttribute(key);
@@ -156,6 +163,7 @@ public class DOMBuilder {
 			var n = list.item(i);
 			if(n instanceof Element) {
 				var db = new DOMBuilder(this.doc, (Element) n);
+				out.add(db);
 				out.addAll(db.recursiveGetAllChildElements());
 			}
 		}
@@ -200,6 +208,10 @@ public class DOMBuilder {
 			}
 		}
 		return Optional.empty();
+	}
+
+	public boolean hasAttribute(final String key) {
+		return pos.hasAttribute(key);
 	}
 
 

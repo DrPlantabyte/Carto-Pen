@@ -57,9 +57,35 @@ public class SVGManager {
 		String filename = svgSrc.getFileName().toString();
 		String id = idMaker.makeID(filename.substring(0,filename.lastIndexOf(".")));
 		var loaded = DOMBuilder.fromFile(svgSrc);
+		prefixIDs(loaded, id+"_");
 		loaded.setAttribute("id", id);
+		//
 		dom.getFirstElementByName("defs").orElseThrow().appendElement(loaded);
 		return id;
+	}
+
+	private static void prefixIDs(DOMBuilder src, String prefix){
+		final var allElements = src.recursiveGetAllChildElements();
+		final var replaceMap = new HashMap<String,String>();
+		for(final var e : allElements){
+			e.getAttribute("id").ifPresent((final String oldAttr) ->{
+				final String newAttr = prefix+oldAttr;
+				e.setAttribute("id", newAttr);
+				replaceMap.put(oldAttr, newAttr);
+			});
+		}
+		for(final var o : allElements){
+			// replace references
+			o.getAttribute("xlink:href").ifPresent((final var oldAttr)->{
+				var attr = oldAttr;
+				for(final var kv : replaceMap.entrySet()) {
+					final var oldID = kv.getKey();
+					final var newId = kv.getValue();
+					attr = attr.replace(oldID, newId);
+				}
+				o.setAttribute("xlink:href", attr);
+			});
+		}
 	}
 
 	public String placeIcon(final String id, final double iconDiameter, final Vec2 pos, final Vec2 scale, final double rotationDegrees) throws NoSuchElementException {
