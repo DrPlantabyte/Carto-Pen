@@ -57,13 +57,19 @@ public class SVGManager {
 		String filename = svgSrc.getFileName().toString();
 		String id = idMaker.makeID(filename.substring(0,filename.lastIndexOf(".")));
 		var loaded = DOMBuilder.fromFile(svgSrc);
+		removeExtraneous(loaded);
 		prefixIDs(loaded, id+"_");
 		loaded.setAttribute("id", id);
 		//
 		dom.getFirstElementByName("defs").orElseThrow().appendElement(loaded);
 		return id;
 	}
-
+	private static void removeExtraneous(DOMBuilder src){
+		// remove Inkscape stuff from embedded svg element
+		for(var e : src.getElementsByName("sodipodi:namedview")){
+			src.removeElement(e);
+		}
+	}
 	private static void prefixIDs(DOMBuilder src, String prefix){
 		final var allElements = src.recursiveGetAllChildElements();
 		final var replaceMap = new HashMap<String,String>();

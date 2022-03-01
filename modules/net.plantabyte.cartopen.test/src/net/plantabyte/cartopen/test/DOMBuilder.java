@@ -214,6 +214,25 @@ public class DOMBuilder {
 		return pos.hasAttribute(key);
 	}
 
+	public DOMBuilder removeElement(DOMBuilder b){
+		return this.removeElement(b.pos);
+	}
+
+	private DOMBuilder removeElement(Element e) {
+		if(pos == e){
+			var p = pos.getParentNode();
+			p.removeChild(pos);
+			if(p instanceof Element) {
+				return new DOMBuilder(doc, (Element) p);
+			} else {
+				return new DOMBuilder(doc, doc.getDocumentElement());
+			}
+		} else {
+			e.getParentNode().removeChild(e);
+			return this;
+		}
+	}
+
 
 	public static class XMLException extends RuntimeException{
 		public XMLException(Throwable cause){
