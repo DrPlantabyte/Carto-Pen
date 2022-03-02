@@ -3,7 +3,6 @@ package net.plantabyte.cartopen.test;
 import net.plantabyte.drptrace.geometry.Vec2;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -53,6 +52,13 @@ public class SVGManager {
 		;
 	}
 
+	public List<String> importAsDef(Collection<Path> svgSrcs) throws IOException, DOMBuilder.XMLException{
+		ArrayList<String> out = new ArrayList<>(svgSrcs.size());
+		for(var p : svgSrcs){
+			out.add(importAsDef(p));
+		}
+		return out;
+	}
 	public String importAsDef(Path svgSrc) throws IOException, DOMBuilder.XMLException {
 		String filename = svgSrc.getFileName().toString();
 		String id = idMaker.makeID(filename.substring(0,filename.lastIndexOf(".")));
