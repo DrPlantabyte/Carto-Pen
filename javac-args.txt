@@ -1,1 +1,1 @@
--d build/compile --module-source-path modules/*/src --module-path build/compile --module-path dependencies --module net.plantabyte.cartopen,net.plantabyte.cartopen.test,net.plantabyte.cartopen.cli
+-d build/compile --module-source-path modules/*/src --module-path build/compile --module-path dependencies --module com.grack.nanojson,net.plantabyte.cartopen,net.plantabyte.cartopen.test,net.plantabyte.cartopen.cli
