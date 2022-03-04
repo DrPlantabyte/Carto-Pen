@@ -1,6 +1,7 @@
 package net.plantabyte.cartopen.test;
 
 
+import com.grack.nanojson.JsonParserException;
 import net.plantabyte.drptrace.*;
 import net.plantabyte.drptrace.geometry.*;
 import net.plantabyte.drptrace.utils.BufferedImageIntMap;
@@ -304,8 +305,8 @@ public class Prototypes {
 		bubbleIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("bubble-1.svg").toURI())));
 
 		Map<Integer, Decorator> pallete = new HashMap<>();
-		pallete.put(0xff898989, new Decorator(mountainIDs,"", 1F, 0F, 0F, 0F));
-		pallete.put(0xff2438ff, new Decorator(bubbleIDs,"fill:#0000ff;fill-opacity:1;stroke:#000000;stroke-width:2px;stroke-linecap:round", 1F, 0F, 1F, 0F));
+		pallete.put(0xff898989, new Decorator(mountainIDs,"", 1F, 1F, 1F, 0F, 0F, 0F));
+		pallete.put(0xff2438ff, new Decorator(bubbleIDs,"fill:#0000ff;fill-opacity:1;stroke:#000000;stroke-width:2px;stroke-linecap:round", 1F, 1F, 0.5F, 0F, 1F, 0F));
 
 		// TODO: create decorator data class with pallette, style, decorFrequency, positionJitter, sizeJitter, distortion
 		// place icons on map
@@ -327,10 +328,14 @@ vertically stacked hex pattern
 		//var tracer = new PolylineTracer();
 		var tracer = new IntervalTracer(1+(int)size);
 		for(var kv : decoratorPallet.entrySet()){
+			print(kv.getValue().toJSON());
+			try{print(Decorator.fromJSON(kv.getValue().toJSON()).toJSON().equals(kv.getValue().toJSON()));}catch (JsonParserException e){e.printStackTrace(System.err);}
 			if(kv.getValue().getStyle().isPresent()) {
+				String style = kv.getValue().getStyle().orElseThrow();
+				//if(style.isBlank()) continue; // no style
 				List<BezierShape> paths = tracer.traceColor(map, kv.getKey());
 				String pathStr = _join(" ", paths.stream().map((var p)->p.toSVGPathString()).collect(Collectors.toList()));
-				svg.appendPathToBGLayer(pathStr, kv.getValue().getStyle().orElseThrow());
+				svg.appendPathToBGLayer(pathStr, style);
 			}
 		}
 		final float spacing = size;

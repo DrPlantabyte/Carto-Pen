@@ -4,6 +4,6 @@ module net.plantabyte.cartopen.test {
 	requires net.plantabyte.cartopen.cli;
 	requires net.plantabyte.drptrace;
 	requires net.plantabyte.drptrace.utils;
+	requires com.grack.nanojson;
 	requires java.desktop;
-	requires java.xml;
 }
