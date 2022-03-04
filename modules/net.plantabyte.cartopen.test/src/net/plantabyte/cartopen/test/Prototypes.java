@@ -306,13 +306,11 @@ public class Prototypes {
 
 		Map<Integer, Decorator> pallete = new HashMap<>();
 		pallete.put(0xff898989, new Decorator(mountainIDs,"", 1F, 1F, 1F, 0F, 0F, 0F));
-		pallete.put(0xff2438ff, new Decorator(bubbleIDs,"fill:#0000ff;fill-opacity:1;stroke:#000000;stroke-width:2px;stroke-linecap:round", 1F, 1F, 0.5F, 0F, 1F, 0F));
+		pallete.put(0xff2438ff, new Decorator(bubbleIDs,"fill:#0000ff;fill-opacity:1;stroke:#000000;stroke-width:2px;stroke-linecap:round", 1F, 1.5F, 0.5F, 0F, 0F, 0F));
 
-		// TODO: create decorator data class with pallette, style, decorFrequency, positionJitter, sizeJitter, distortion
 		// place icons on map
 		var prng = new Random();
 		decorateMap(intMap, pallete, svg, cellSize, prng, true);
-		// TODO: test hex grid or similar pattern
 
 		svg.writeToFile(Paths.get("test5.svg"));
 	}
@@ -320,62 +318,84 @@ public class Prototypes {
 	private static void decorateMap(IntMap map, Map<Integer, Decorator> decoratorPallet, SVGManager svg, float size, Random prng, boolean ignoreMissing){
 		/*
 vertically stacked hex pattern
- __
-/  \__/
-\__/  \
-/  \__/
+ __    __
+/  \__/  \
+\__/  \__/
+/  \__/  \
+\__/  \__/
+/  \__/  \
 		 */
+
+		// missing check
+		if(!ignoreMissing){
+			var mapSet = new HashSet<Integer>();
+			for(int y = 0; y < map.getWidth(); ++y){
+				for(int x = 0; x < map.getWidth(); ++x){
+					mapSet.add(map.get(x, y));
+				}
+			}
+			for(int c : mapSet){
+				if(!decoratorPallet.containsKey(c) || decoratorPallet.get(c).getDecorationIDs().length == 0){
+					throw new IllegalArgumentException(String.format("No decorators found for color 0x%s", Integer.toHexString(c)));
+				}
+			}
+		}
+
+		//final double piOverThree = Math.PI / 3; // 60 degrees
+		final double root3over2 = Math.sqrt(3.0)/2.0;
+		// Using TreeSet to sort icons front (bottom) to back (top)
+		final var sortedPlacement = new TreeSet<PlaceRef>();
 		//var tracer = new PolylineTracer();
 		var tracer = new IntervalTracer(1+(int)size);
-		for(var kv : decoratorPallet.entrySet()){
+		for(var kv : decoratorPallet.entrySet()) {
+			final var targetColor = kv.getKey();
+			final var decorator = kv.getValue();
 			print(kv.getValue().toJSON());
-			try{print(Decorator.fromJSON(kv.getValue().toJSON()).toJSON().equals(kv.getValue().toJSON()));}catch (JsonParserException e){e.printStackTrace(System.err);}
-			if(kv.getValue().getStyle().isPresent()) {
+			try {
+				print(Decorator.fromJSON(kv.getValue().toJSON()).toJSON().equals(kv.getValue().toJSON()));
+			} catch (JsonParserException e) {
+				e.printStackTrace(System.err);
+			}
+			if (kv.getValue().getStyle().isPresent()) {
 				String style = kv.getValue().getStyle().orElseThrow();
 				//if(style.isBlank()) continue; // no style
 				List<BezierShape> paths = tracer.traceColor(map, kv.getKey());
-				String pathStr = _join(" ", paths.stream().map((var p)->p.toSVGPathString()).collect(Collectors.toList()));
+				String pathStr = _join(" ", paths.stream().map((var p) -> p.toSVGPathString()).collect(Collectors.toList()));
 				svg.appendPathToBGLayer(pathStr, style);
 			}
-		}
-		final float spacing = size;
-		//final double piOverThree = Math.PI / 3; // 60 degrees
-		final double root3over2 = Math.sqrt(3.0)/2.0;
-		final double colWidth = spacing * root3over2;
-		final double alternatingOffset = spacing * 0.5;
-		final double rowHeight = spacing;
-		final int numCols = (int)(svg.getWidth() / colWidth) + 1;
-		final int numRows = (int)(svg.getWidth() / rowHeight) + 1;
-		final var sortedPlacement = new TreeSet<PlaceRef>();
-		// Using TreeSet to sort icons front (bottom) to back (top)
-		for(int row = 0; row < numRows; ++row){
-			for(int col = 0; col < numCols; ++col){
-				final double x = col * colWidth;
-				final int ix = (int)(x+0.5);
-				final double y = row * rowHeight + ((col % 2) * alternatingOffset);
-				final int iy = (int)(y+0.5);
-				if(!map.isInRange(ix, iy)) continue;
-				final int color = map.get(ix, iy);
-				final var decorator = decoratorPallet.get(color);
-				if(decorator == null || decorator.getDecorationIDs().length == 0) {
-					// no decorations found for this color!
-					if(!ignoreMissing && decorator == null) {
-						throw new IllegalArgumentException (String.format("No decorators found for color 0x%s", Integer.toHexString(color)));
+
+			// now honey-comb the icons
+			final float spacing = size * decorator.getCellSize();
+			final double colWidth = spacing * root3over2;
+			final double alternatingOffset = spacing * 0.5;
+			final double rowHeight = spacing;
+			final int numCols = (int) (svg.getWidth() / colWidth) + 1;
+			final int numRows = (int) (svg.getWidth() / rowHeight) + 1;
+
+			for (int row = 0; row < numRows; ++row) {
+				for (int col = 0; col < numCols; ++col) {
+					final double x = col * colWidth;
+					final int ix = (int) (x + 0.5);
+					final double y = row * rowHeight + ((col % 2) * alternatingOffset);
+					final int iy = (int) (y + 0.5);
+					if (!map.isInRange(ix, iy)) continue;
+					final int color = map.get(ix, iy);
+					if(color == targetColor) {
+						//_place(x, y, size, spacing, decorator, prng, svg);
+						if (prng.nextFloat() > decorator.getDecorFrequency()) continue;
+						final var nx = jitter(x, spacing * decorator.getPositionJitter(), prng);
+						final var ny = jitter(y, spacing * decorator.getPositionJitter(), prng);
+						final float _size = spacing * decorator.getIconSize();
+						final float iconSize = jitter(_size, _size * decorator.getSizeJitter(), prng);
+						final var distortion = decorator.getDistortionJitter();
+						final var iconProportions = new Vec2(jitter(1, distortion, prng), jitter(1, distortion, prng));
+						final var paletteOfIDs = decorator.getDecorationIDs();
+						final String iconID = paletteOfIDs[prng.nextInt(paletteOfIDs.length)];
+						final double iconRotation = 0;
+						//svg.placeIcon(iconID, iconSize,new Vec2(x, y), iconProportions, iconRotation);
+						sortedPlacement.add(new PlaceRef(iconID, iconSize, new Vec2(nx, ny), iconProportions, iconRotation));
 					}
-					continue;
 				}
-				//_place(x, y, size, spacing, decorator, prng, svg);
-				if(prng.nextFloat() > decorator.getDecorFrequency()) continue;
-				final var nx = jitter(x, spacing * decorator.getPositionJitter(), prng);
-				final var ny = jitter(y, spacing * decorator.getPositionJitter(), prng);
-				final float iconSize = jitter(size, size * decorator.getSizeJitter(), prng);
-				final var distortion = decorator.getDistortionJitter();
-				final var iconProportions = new Vec2(jitter(1, distortion, prng), jitter(1, distortion, prng));
-				final var paletteOfIDs = decorator.getDecorationIDs();
-				final String iconID = paletteOfIDs[prng.nextInt(paletteOfIDs.length)];
-				final double iconRotation = 0;
-				//svg.placeIcon(iconID, iconSize,new Vec2(x, y), iconProportions, iconRotation);
-				sortedPlacement.add(new PlaceRef(iconID, iconSize,new Vec2(nx, ny), iconProportions, iconRotation));
 			}
 		}
 		// place all icons on map in sorted order (bottom in front of top)
@@ -400,9 +420,11 @@ vertically stacked hex pattern
 		return (2F*prng.nextFloat() - 1F);
 	}
 	private static float jitter(float mean, float plusMinus, Random prng){
+		if(plusMinus == 0) return mean;
 		return max(0F, mean + plusMinus * (2F*prng.nextFloat() - 1F));
 	}
 	private static double jitter(double mean, double plusMinus, Random prng){
+		if(plusMinus == 0) return mean;
 		return max(0D, mean + plusMinus * (2F*prng.nextFloat() - 1F));
 	}
 

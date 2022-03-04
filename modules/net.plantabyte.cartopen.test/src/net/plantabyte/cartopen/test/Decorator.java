@@ -32,9 +32,14 @@ public class Decorator {
 		this.distortionJitter = distortionJitter;
 	}
 	public Decorator(
-			final Collection<String> decorationIDs, final float decorFrequency
+			final Collection<String> decorationIDs
 	) {
 		this(decorationIDs, null, 1F, 1F, 1F, 0F, 0F, 0F);
+	}
+	public Decorator(
+			final Collection<String> decorationIDs, String svgStyle
+	) {
+		this(decorationIDs, svgStyle, 1F, 1F, 1F, 0F, 0F, 0F);
 	}
 
 	private Decorator( // essentially a move constructor
