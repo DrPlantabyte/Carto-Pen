@@ -4,12 +4,16 @@ package net.plantabyte.cartopen.test;
 import com.grack.nanojson.JsonParserException;
 import net.plantabyte.drptrace.*;
 import net.plantabyte.drptrace.geometry.*;
+import net.plantabyte.drptrace.intmaps.ZOrderIntMap;
 import net.plantabyte.drptrace.utils.BufferedImageIntMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -298,6 +302,17 @@ public class Prototypes {
 		var svg = new SVGManager(w, h);
 		var mountainIDs = new ArrayList<String>(4);
 		var bubbleIDs = new ArrayList<String>();
+		var fileList = ("borial-forest-1.svg;desert-1.svg;desert-2.svg;desert-3.svg;desert-4.svg;desert-5.svg;"
+				+"jungle-1.svg;jungle-2.svg;jungle-3.svg;jungle-4.svg;mountain-1.svg;mountain-2.svg;mountain-3.svg;"
+				+"mountain-4.svg;plains-1.svg;plains-2.svg;sand-sea-1.svg;sand-sea-2.svg;sand-sea-3.svg;swamp-1.svg;"
+				+"swamp-2.svg;swamp-3.svg;temperate-forest-1.svg;temperate-forest-2.svg;wasteland-1.svg;wasteland-2.svg;"
+				+"wasteland-3.svg;wasteland-4.svg;wasteland-5.svg;water-1.svg;water-2.svg").split(";");
+		print(fileList);
+		var rsrcMap = new HashMap<String, List<URI>>();
+		for(vas s : fileList){
+			rsrcMap.put()
+		}
+
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-1.svg").toURI())));
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-2.svg").toURI())));
 		mountainIDs.add(svg.importAsDef(Paths.get(Prototypes.class.getResource("mountain-3.svg").toURI())));
@@ -310,12 +325,12 @@ public class Prototypes {
 
 		// place icons on map
 		var prng = new Random();
-		decorateMap(intMap, pallete, svg, cellSize, prng, true);
+		decorateMap(intMap, pallete, svg, cellSize, prng);
 
 		svg.writeToFile(Paths.get("test5.svg"));
 	}
 
-	private static void decorateMap(IntMap map, Map<Integer, Decorator> decoratorPallet, SVGManager svg, float size, Random prng, boolean ignoreMissing){
+	private static void decorateMap(IntMap map, Map<Integer, Decorator> decoratorPallet, SVGManager svg, float size, Random prng){
 		/*
 vertically stacked hex pattern
  __    __
@@ -326,25 +341,11 @@ vertically stacked hex pattern
 /  \__/  \
 		 */
 
-		// missing check
-		if(!ignoreMissing){
-			var mapSet = new HashSet<Integer>();
-			for(int y = 0; y < map.getWidth(); ++y){
-				for(int x = 0; x < map.getWidth(); ++x){
-					mapSet.add(map.get(x, y));
-				}
-			}
-			for(int c : mapSet){
-				if(!decoratorPallet.containsKey(c) || decoratorPallet.get(c).getDecorationIDs().length == 0){
-					throw new IllegalArgumentException(String.format("No decorators found for color 0x%s", Integer.toHexString(c)));
-				}
-			}
-		}
 
 		//final double piOverThree = Math.PI / 3; // 60 degrees
 		final double root3over2 = Math.sqrt(3.0)/2.0;
 		// Using TreeSet to sort icons front (bottom) to back (top)
-		final var sortedPlacement = new TreeSet<PlaceRef>();
+		final var sortedPlacement = new TreeSet<IconPlacement>();
 		//var tracer = new PolylineTracer();
 		var tracer = new IntervalTracer(1+(int)size);
 		for(var kv : decoratorPallet.entrySet()) {
@@ -393,7 +394,7 @@ vertically stacked hex pattern
 						final String iconID = paletteOfIDs[prng.nextInt(paletteOfIDs.length)];
 						final double iconRotation = 0;
 						//svg.placeIcon(iconID, iconSize,new Vec2(x, y), iconProportions, iconRotation);
-						sortedPlacement.add(new PlaceRef(iconID, iconSize, new Vec2(nx, ny), iconProportions, iconRotation));
+						sortedPlacement.add(new IconPlacement(iconID, iconSize, new Vec2(nx, ny), iconProportions, iconRotation));
 					}
 				}
 			}
@@ -428,18 +429,49 @@ vertically stacked hex pattern
 		return max(0D, mean + plusMinus * (2F*prng.nextFloat() - 1F));
 	}
 
+	private static IntMap mapToColorPalette(int[] rgbColors, IntMap src){
+		var out = new ZOrderIntMap(src.getWidth(), src.getHeight());
+		for(int y = 0; y < src.getHeight(); ++y){
+			for(int x = 0; x < src.getWidth(); ++x){
+				final int src_argb = src.get(x, y);
+				var shortestDist = Double.MAX_VALUE;
+				int index = 0;
+				for(int i = 0; i < rgbColors.length; ++i){
+					double d = colorDistance(src_argb, rgbColors[i]);
+					if(d < shortestDist){
+						shortestDist = d;
+						index = 0;
+					}
+				}
+				out.set(x, y, rgbColors[index]);
+			}
+		}
+		return out;
+	}
+
+	private static double colorDistance(int argb1, int argb2){
+		final float[] hsb1 = new float[3];
+		final float[] hsb2 = new float[3];
+		Color.RGBtoHSB((argb1>>16)&0xFF, (argb1>>8)&0xFF, argb1&0xFF, hsb1);
+		Color.RGBtoHSB((argb2>>16)&0xFF, (argb2>>8)&0xFF, argb2&0xFF, hsb2);
+		var colorAngle = Math.abs(hsb2[0] - hsb1[0]);
+		if(colorAngle > 0.5F) colorAngle = 1F - colorAngle;
+		var dsb = Math.abs(hsb2[1] * hsb2[2] - hsb1[1] * hsb1[2]);
+		return Math.sqrt(colorAngle*colorAngle + dsb*dsb);
+	}
+
 	private static void showImg(BufferedImage img){
 		JOptionPane.showMessageDialog(null, new JLabel(new ImageIcon(img)));
 	}
 
-	private static class PlaceRef implements Comparable<PlaceRef>{
+	private static class IconPlacement implements Comparable<IconPlacement>{
 		public final String id;
 		public final float size;
 		public final Vec2 pos;
 		public final Vec2 proportions;
 		public final double rotation;
 
-		private PlaceRef(String id, float size, Vec2 pos, Vec2 proportions, double rotation) {
+		private IconPlacement(String id, float size, Vec2 pos, Vec2 proportions, double rotation) {
 			this.id = id;
 			this.size = size;
 			this.pos = pos;
@@ -449,7 +481,7 @@ vertically stacked hex pattern
 
 
 		@Override
-		public int compareTo(PlaceRef that) {
+		public int compareTo(IconPlacement that) {
 			int c = Double.compare(this.pos.y, that.pos.y);
 			if(c == 0) c = Double.compare(this.pos.x, that.pos.y);
 			if(c == 0) c = Integer.compare(this.hashCode(), that.hashCode());
